@@ -92,6 +92,7 @@ ConfigureDialog::saveSettings() {
     settings.setValue(toLabel.text(),             toEdit.text());
     settings.setValue(ccLabel.text(),             ccEdit.text());
     settings.setValue(cc1Label.text(),            cc1Edit.text());
+    //qDebug() << "max Temp=" << maxTemperatureEdit.text();
     settings.setValue(maxTemperatureLabel.text(), maxTemperatureEdit.text());
     QString sMessageText = textMessage.toPlainText();
     settings.setValue(textLabel.text(), sMessageText);
@@ -169,24 +170,13 @@ ConfigureDialog::onOk() {
     if(!bCanClose)
         return;
     saveSettings();
-    char line[256];
-    FILE *cmd = popen("pidof upsAlarm", "r");
-    fgets(line, 256, cmd);
-    pid_t pid = strtoul(line, nullptr, 10);
-    pclose(cmd);
-    if(pid != 0) {
-        QString sCommand = QString("kill -s %1 %2")
-                           .arg(SIGUSR1)
-                           .arg(pid);
-        if(system(sCommand.toLatin1()))
-            QMessageBox::warning(this,
-                                 QString("Unable to Signal upsAlarm"),
-                                 QString("Warning:\n") +
-                                 QString("The service upsAlarm can't be signaled\n") +
-                                 QString("The service MUST be Restarted with:\n") +
-                                 QString("sudo systemctl restart upsAlarm.service"),
-                                 QMessageBox::Ok);
-    }
+    QMessageBox::warning(this,
+                         QString("Configuration Changed"),
+                         QString("Warning:\n") +
+                         QString("The service upsAlarm MUST be Restarted with:\n") +
+                         QString("sudo systemctl restart upsAlarm.service\n") +
+                         QString("for the new settings to take effect !"),
+                         QMessageBox::Ok);
     accept();
 }
 
